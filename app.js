@@ -12,6 +12,7 @@ class ReelifyApp {
         this.currentFilter = 'all';
         this.currentMood = null;
         this.currentPage = 1;
+        this.currentMovies = [];
         this.isLoading = false;
 
         // Collection from localStorage
@@ -119,7 +120,75 @@ class ReelifyApp {
         }));
     }
 
-    // ===== Event Bindings =====
+    // Generate dynamic AI review based on movie data
+    generateAIReview(movie) {
+        const genres = movie.genres || [];
+        const rating = parseFloat(movie.rating) || 7;
+        const overview = movie.overview || '';
+
+        // Genre-based pros and cons
+        const genreReviews = {
+            'Action': { pros: ['Nefes kesen aksiyon sahneleri', 'Adrenalin dolu anlar'], cons: ['Bazı sahneler fazla şiddet içerebilir'] },
+            'Aksiyon': { pros: ['Nefes kesen aksiyon sahneleri', 'Adrenalin dolu anlar'], cons: ['Bazı sahneler fazla şiddet içerebilir'] },
+            'Comedy': { pros: ['Eğlenceli ve güldüren anlar', 'Hafif bir izleme deneyimi'], cons: ['Mizah tarzı herkese hitap etmeyebilir'] },
+            'Komedi': { pros: ['Eğlenceli ve güldüren anlar', 'Hafif bir izleme deneyimi'], cons: ['Mizah tarzı herkese hitap etmeyebilir'] },
+            'Drama': { pros: ['Duygusal derinlik', 'Etkileyici karakter gelişimi'], cons: ['Yavaş tempo bazılarını sıkabilir'] },
+            'Dram': { pros: ['Duygusal derinlik', 'Etkileyici karakter gelişimi'], cons: ['Yavaş tempo bazılarını sıkabilir'] },
+            'Horror': { pros: ['Gerilim dolu atmosfer', 'Etkili korku sahneleri'], cons: ['Hassas izleyiciler için rahatsız edici olabilir'] },
+            'Korku': { pros: ['Gerilim dolu atmosfer', 'Etkili korku sahneleri'], cons: ['Hassas izleyiciler için rahatsız edici olabilir'] },
+            'Romance': { pros: ['Romantik ve duygusal anlar', 'Güzel kimya'], cons: ['Klişe anlar içerebilir'] },
+            'Romantik': { pros: ['Romantik ve duygusal anlar', 'Güzel kimya'], cons: ['Klişe anlar içerebilir'] },
+            'Science Fiction': { pros: ['Yaratıcı bilim kurgu konsepti', 'Görsel efektler etkileyici'], cons: ['Bazı bilimsel detaylar gerçekçi olmayabilir'] },
+            'Bilim Kurgu': { pros: ['Yaratıcı bilim kurgu konsepti', 'Görsel efektler etkileyici'], cons: ['Bazı bilimsel detaylar gerçekçi olmayabilir'] },
+            'Thriller': { pros: ['Sürekli merak uyandıran hikaye', 'Tahmin edilemez gelişmeler'], cons: ['Gerilim sevmeyenler için yorucu olabilir'] },
+            'Gerilim': { pros: ['Sürekli merak uyandıran hikaye', 'Tahmin edilemez gelişmeler'], cons: ['Gerilim sevmeyenler için yorucu olabilir'] },
+            'Animation': { pros: ['Görsel olarak büyüleyici', 'Her yaştan izleyiciye uygun'], cons: ['Yetişkinler için basit gelebilir'] },
+            'Animasyon': { pros: ['Görsel olarak büyüleyici', 'Her yaştan izleyiciye uygun'], cons: ['Yetişkinler için basit gelebilir'] },
+            'Adventure': { pros: ['Macera dolu hikaye', 'Keşfetme hissi veriyor'], cons: ['Bazı bölümler uzun gelebilir'] },
+            'Macera': { pros: ['Macera dolu hikaye', 'Keşfetme hissi veriyor'], cons: ['Bazı bölümler uzun gelebilir'] },
+            'Fantasy': { pros: ['Zengin fantastik evren', 'Hayal gücünü zorlayan görsellik'], cons: ['Gerçekçilik arayanlar için uygun olmayabilir'] },
+            'Fantastik': { pros: ['Zengin fantastik evren', 'Hayal gücünü zorlayan görsellik'], cons: ['Gerçekçilik arayanlar için uygun olmayabilir'] },
+            'Crime': { pros: ['İlgi çekici suç hikayesi', 'Zekice kurgulanmış senaryo'], cons: ['Karanlık temalar içerir'] },
+            'Suç': { pros: ['İlgi çekici suç hikayesi', 'Zekice kurgulanmış senaryo'], cons: ['Karanlık temalar içerir'] },
+            'War': { pros: ['Tarihsel gerçekçilik', 'Duygusal derinlik'], cons: ['Şiddet sahneleri rahatsız edici olabilir'] },
+            'Savaş': { pros: ['Tarihsel gerçekçilik', 'Duygusal derinlik'], cons: ['Şiddet sahneleri rahatsız edici olabilir'] }
+        };
+
+        let pros = [];
+        let cons = [];
+
+        // Add genre-specific reviews
+        for (const genre of genres) {
+            const genreName = typeof genre === 'string' ? genre : genre.name;
+            if (genreReviews[genreName]) {
+                pros.push(...genreReviews[genreName].pros);
+                cons.push(...genreReviews[genreName].cons);
+            }
+        }
+
+        // Add rating-based comments
+        if (rating >= 8) {
+            pros.push('Eleştirmenlerden yüksek puan aldı');
+        } else if (rating >= 7) {
+            pros.push('Genel olarak olumlu değerlendirmeler');
+        } else if (rating < 6) {
+            cons.push('Bazı izleyiciler hayal kırıklığına uğramış');
+        }
+
+        // Remove duplicates and limit
+        pros = [...new Set(pros)].slice(0, 3);
+        cons = [...new Set(cons)].slice(0, 2);
+
+        // Fallback if no genre matched
+        if (pros.length === 0) {
+            pros = ['İlgi çekici hikaye anlatımı', 'Görsel açıdan tatmin edici'];
+        }
+        if (cons.length === 0) {
+            cons = ['Herkesin zevkine uygun olmayabilir'];
+        }
+
+        return { pros, cons };
+    }
     bindEvents() {
         document.getElementById('searchBtn').addEventListener('click', () => this.handleSearch());
         document.getElementById('searchInput').addEventListener('keypress', (e) => {
@@ -249,7 +318,12 @@ class ReelifyApp {
         document.getElementById('resultsCount').textContent = total > 0 ? `${total.toLocaleString()} film` : '';
 
         const grid = document.getElementById('moviesGrid');
-        if (this.currentPage === 1) grid.innerHTML = '';
+        if (this.currentPage === 1) {
+            grid.innerHTML = '';
+            this.currentMovies = [];
+        }
+        // Cache movies for modal access
+        this.currentMovies = [...(this.currentMovies || []), ...movies];
 
         if (!movies.length && this.currentPage === 1) {
             grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🎬</div><p>Film bulunamadı</p></div>`;
@@ -274,8 +348,8 @@ class ReelifyApp {
                     </div>
                 </div>
                 <div class="movie-info">
-                    <h3 class="movie-title">${movie.title}</h3>
-                    ${movie.originalTitle && movie.originalTitle !== movie.title ? `<p class="movie-original-title">${movie.originalTitle}</p>` : ''}
+                    <h3 class="movie-title">${movie.originalTitle || movie.title}</h3>
+                    ${movie.originalTitle && movie.originalTitle !== movie.title ? `<p class="movie-turkish-title">(${movie.title})</p>` : ''}
                     ${movie.reason ? `<p class="movie-reason">${movie.reason}</p>` : ''}
                     <div class="movie-meta"><span>${movie.year}</span></div>
                 </div>
@@ -285,32 +359,52 @@ class ReelifyApp {
     // ===== Modal =====
     async openMovieModal(movieId) {
         this.showLoading();
-        // Check local movies first
-        const localMovie = this.localMovies.find(m => m.id === movieId);
-        if (localMovie) {
-            this.openModal(localMovie);
-            this.hideLoading();
-            return;
-        }
-        // Try TMDB API
-        const { details, videos, providers } = await this.getMovieDetails(movieId);
-        if (details && !details.status_code) {
-            const movie = {
-                id: details.id,
-                title: details.title,
-                originalTitle: details.original_title || details.title,
-                year: details.release_date?.split('-')[0] || 'N/A',
-                duration: details.runtime || 120,
-                rating: details.vote_average?.toFixed(1),
-                imdb: details.vote_average?.toFixed(1),
-                poster: details.poster_path ? `${TMDB_IMG}/w500${details.poster_path}` : null,
-                backdrop: details.backdrop_path ? `${TMDB_IMG}/original${details.backdrop_path}` : null,
-                overview: details.overview,
-                genres: details.genres?.map(g => g.name) || [],
-                trailer: videos?.results?.find(v => v.type === 'Trailer')?.key,
-                platforms: providers?.results?.TR?.flatrate?.map(p => p.provider_name) || ['Bilgi yok']
-            };
-            this.openModal(movie);
+        try {
+            // Check local movies first
+            const localMovie = this.localMovies.find(m => m.id === movieId);
+            if (localMovie) {
+                this.openModal(localMovie);
+                this.hideLoading();
+                return;
+            }
+
+            // Check cached movies from current display
+            const cachedMovie = this.currentMovies.find(m => m.id === movieId);
+
+            // Try TMDB API
+            const { details, videos, providers } = await this.getMovieDetails(movieId);
+            if (details && !details.status_code) {
+                const movie = {
+                    id: details.id,
+                    title: details.title,
+                    originalTitle: details.original_title || details.title,
+                    year: details.release_date?.split('-')[0] || 'N/A',
+                    duration: details.runtime || 120,
+                    rating: details.vote_average?.toFixed(1),
+                    imdb: details.vote_average?.toFixed(1),
+                    poster: details.poster_path ? `${TMDB_IMG}/w500${details.poster_path}` : null,
+                    backdrop: details.backdrop_path ? `${TMDB_IMG}/original${details.backdrop_path}` : null,
+                    overview: details.overview || 'Açıklama mevcut değil.',
+                    genres: details.genres?.map(g => g.name) || [],
+                    trailer: videos?.results?.find(v => v.type === 'Trailer')?.key,
+                    platforms: providers?.results?.TR?.flatrate?.map(p => p.provider_name) || ['Bilgi yok']
+                };
+                this.openModal(movie);
+            } else if (cachedMovie) {
+                // Use cached movie if API fails
+                this.openModal(cachedMovie);
+            } else {
+                alert('Film detayları yüklenemedi. Lütfen tekrar deneyin.');
+            }
+        } catch (error) {
+            console.error('Modal yükleme hatası:', error);
+            // Try cached movie on error
+            const cachedMovie = this.currentMovies.find(m => m.id === movieId);
+            if (cachedMovie) {
+                this.openModal(cachedMovie);
+            } else {
+                alert('Film detayları yüklenemedi. Lütfen tekrar deneyin.');
+            }
         }
         this.hideLoading();
     }
@@ -332,8 +426,8 @@ class ReelifyApp {
                         <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/140x210?text=No+Poster'">
                     </div>
                     <div class="modal-title-section">
-                        <h1 class="modal-title">${movie.title}</h1>
-                        ${movie.originalTitle && movie.originalTitle !== movie.title ? `<p class="modal-original-title">${movie.originalTitle}</p>` : ''}
+                        <h1 class="modal-title">${movie.originalTitle || movie.title}</h1>
+                        ${movie.originalTitle && movie.originalTitle !== movie.title ? `<p class="modal-turkish-title">(${movie.title})</p>` : ''}
                         <div class="modal-meta">
                             <span class="imdb-badge">IMDb ${movie.imdb || movie.rating}</span>
                             <span>${movie.year}</span>
@@ -361,8 +455,13 @@ class ReelifyApp {
                 
                 <div class="ai-review">
                     <h3>🤖 AI Değerlendirmesi</h3>
-                    <div class="review-pros"><h4>👍 Beğenilenler</h4><ul><li>Güçlü hikaye anlatımı</li><li>Etkileyici oyunculuklar</li></ul></div>
-                    <div class="review-cons"><h4>👎 Eleştiriler</h4><ul><li>Tempo bazıları için yavaş olabilir</li></ul></div>
+                    ${(() => {
+                const review = this.generateAIReview(movie);
+                return `
+                            <div class="review-pros"><h4>👍 Beğenilenler</h4><ul>${review.pros.map(p => `<li>${p}</li>`).join('')}</ul></div>
+                            <div class="review-cons"><h4>👎 Eleştiriler</h4><ul>${review.cons.map(c => `<li>${c}</li>`).join('')}</ul></div>
+                        `;
+            })()}
                 </div>
                 
                 <div class="modal-actions">
