@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reelify - Film Keşfet</title>
+    <meta name="description"
+        content="Ruh halinize göre film öneren akıllı uygulama. Doğal dilde arayın, keşfedin, izleyin.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🎬</span>
+                <span class="logo-text">Reelify</span>
+            </div>
+            <button class="btn-icon" id="collectionBtn" title="Koleksiyonum">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Search Section -->
+            <section class="search-section">
+                <h1 class="search-title">Ne izlemek istiyorsun?</h1>
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Örn: Hüngür hüngür ağlayacağım filmler...">
+                    <button class="search-btn" id="searchBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Duration Filter -->
+                <div class="duration-filter">
+                    <span class="filter-label">Süre:</span>
+                    <button class="filter-chip active" data-duration="all">Tümü</button>
+                    <button class="filter-chip" data-duration="short">
+                        < 90 dk</button>
+                            <button class="filter-chip" data-duration="medium">90-120 dk</button>
+                            <button class="filter-chip" data-duration="long">> 2 saat</button>
+                </div>
+            </section>
+
+            <!-- Mood Section -->
+            <section class="mood-section">
+                <h2 class="section-title">Ruh Halin Nasıl?</h2>
+                <div class="mood-grid">
+                    <button class="mood-btn" data-mood="sad">
+                        <span class="mood-emoji">😢</span>
+                        <span class="mood-label">Üzgün</span>
+                    </button>
+                    <button class="mood-btn" data-mood="happy">
+                        <span class="mood-emoji">😄</span>
+                        <span class="mood-label">Mutlu</span>
+                    </button>
+                    <button class="mood-btn" data-mood="relaxed">
+                        <span class="mood-emoji">😌</span>
+                        <span class="mood-label">Rahat</span>
+                    </button>
+                    <button class="mood-btn" data-mood="excited">
+                        <span class="mood-emoji">🤩</span>
+                        <span class="mood-label">Heyecanlı</span>
+                    </button>
+                    <button class="mood-btn" data-mood="romantic">
+                        <span class="mood-emoji">🥰</span>
+                        <span class="mood-label">Romantik</span>
+                    </button>
+                    <button class="mood-btn" data-mood="scared">
+                        <span class="mood-emoji">😱</span>
+                        <span class="mood-label">Korkulu</span>
+                    </button>
+                    <button class="mood-btn" data-mood="thoughtful">
+                        <span class="mood-emoji">🤔</span>
+                        <span class="mood-label">Düşünceli</span>
+                    </button>
+                    <button class="mood-btn" data-mood="nostalgic">
+                        <span class="mood-emoji">🥲</span>
+                        <span class="mood-label">Nostaljik</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="quick-actions">
+                <button class="action-btn surprise" id="surpriseBtn">
+                    <span class="action-icon">✨</span>
+                    <span class="action-text">Şaşırt Beni</span>
+                </button>
+                <button class="action-btn idea" id="ideaBtn">
+                    <span class="action-icon">💡</span>
+                    <span class="action-text">Fikir Al</span>
+                </button>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <h2 class="section-title" id="resultsTitle">Keşfet</h2>
+                    <span class="results-count" id="resultsCount"></span>
+                </div>
+                <div class="movies-grid" id="moviesGrid">
+                    <!-- Movie cards will be inserted here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Collection Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Koleksiyonum</h2>
+                <button class="btn-icon close-sidebar" id="closeSidebar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="watchlist">İzlenecekler</button>
+                <button class="sidebar-tab" data-tab="watched">İzlediklerim</button>
+                <button class="sidebar-tab" data-tab="stats">İstatistik</button>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="tab-content active" id="watchlistTab">
+                    <div class="collection-list" id="watchlistItems">
+                        <!-- Watchlist items -->
+                    </div>
+                </div>
+                <div class="tab-content" id="watchedTab">
+                    <div class="collection-list" id="watchedItems">
+                        <!-- Watched items -->
+                    </div>
+                </div>
+                <div class="tab-content" id="statsTab">
+                    <div class="stats-container" id="statsContainer">
+                        <!-- Stats will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Movie Detail Modal -->
+        <div class="modal" id="movieModal">
+            <div class="modal-overlay" id="modalOverlay"></div>
+            <div class="modal-content">
+                <button class="modal-close" id="modalClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <div class="modal-body" id="modalBody">
+                    <!-- Modal content will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chat Bot -->
+        <button class="chat-fab" id="chatFab" title="Film Asistanı">
+            <span class="fab-icon">🤖</span>
+            <span class="fab-pulse"></span>
+        </button>
+
+        <div class="chat-panel" id="chatPanel">
+            <div class="chat-header">
+                <div class="chat-avatar">🎬</div>
+                <div class="chat-title">
+                    <h3>Film Asistanı</h3>
+                    <span>Sana en iyi filmi bulayım!</span>
+                </div>
+                <button class="chat-close" id="chatClose">✕</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message bot">
+                    <div class="message-content">
+                        Selam! 👋 Ben senin film asistanınım. Bana ne tür bir film izlemek istediğini anlat, sana en
+                        uygun önerileri yapayım! Örneğin:<br><br>
+                        💭 "Aksiyon dolu bir şey istiyorum"<br>
+                        😢 "Ağlayacağım bir film öner"<br>
+                        🎉 "Arkadaşlarla izlenecek komedi"
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Film isteğini yaz...">
+                <button class="chat-send" id="chatSend">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
